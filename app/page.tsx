@@ -160,14 +160,14 @@ export default function HomePage() {
                     Shop Now <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
-                {/* <Button
+                <Button
                   size="lg"
                   variant="outline"
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg font-semibold"
                 >
                   <Play className="mr-2 w-5 h-5" />
                   Watch Demo
-                </Button> */}
+                </Button>
               </div>
 
               {/* Stats */}

@@ -1,119 +1,111 @@
-"use client";
-export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import {
-  Package,
-  Truck,
-  Calendar,
-  MapPin,
-  Eye,
-  ArrowLeft,
-  Filter,
-} from "lucide-react";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import ETrikeLoader from "@/components/ui/etrike-loader";
-import { getCurrentUser  } from "@/lib/auth";
-import { useETrikeToast } from "@/components/ui/toast-container"; // Import the toast hook
+"use client"
+export const dynamic = "force-dynamic"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Package, Truck, Calendar, MapPin, Eye, ArrowLeft, Filter } from "lucide-react"
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import ETrikeLoader from "@/components/ui/etrike-loader"
+import { getCurrentUser } from "@/lib/auth"
+import { useClientToast } from "@/hooks/use-client-toast"
 
 interface Order {
-  id: number;
-  order_number: string;
-  status: string;
-  total: number;
-  created_at: string;
+  id: number
+  order_number: string
+  status: string
+  total: number
+  created_at: string
   items: Array<{
-    id: number;
+    id: number
     product: {
-      name: string;
-      images: string[];
-    };
-    quantity: number;
-    price: number;
-  }>;
-  first_name: string;
-  last_name: string;
+      name: string
+      images: string[]
+    }
+    quantity: number
+    price: number
+  }>
+  first_name: string
+  last_name: string
 }
 
 export default function OrdersPage() {
-  const router = useRouter();
-  const toast = useETrikeToast(); // Use the toast hook
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const router = useRouter()
+  const toast = useClientToast()
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   useEffect(() => {
-    const user = getCurrentUser ();
+    const user = getCurrentUser()
     if (!user) {
-      router.push("/login");
-      return;
+      router.push("/login")
+      return
     }
 
-    fetchOrders();
-  }, [router]);
+    fetchOrders()
+  }, [router])
 
   const fetchOrders = async () => {
     try {
-      const token = getAuthToken();
+      const token = getAuthToken()
       if (!token) {
-        console.error("No auth token found");
-        router.push("/login");
-        return;
+        console.error("No auth token found")
+        router.push("/login")
+        return
       }
 
-      console.log("Fetching orders with token:", token.substring(0, 10) + "...");
+      console.log("Fetching orders with token:", token.substring(0, 10) + "...")
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
       const response = await fetch(`${apiUrl}/orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-      });
+      })
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API error response:", errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        const errorText = await response.text()
+        console.error("API error response:", errorText)
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        const ordersData = data.data?.data || data.data || [];
-        setOrders(ordersData);
+        const ordersData = data.data?.data || data.data || []
+        setOrders(ordersData)
       } else {
-        console.error("API returned error:", data.message);
-        throw new Error(data.message || "Failed to fetch orders");
+        console.error("API returned error:", data.message)
+        throw new Error(data.message || "Failed to fetch orders")
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Failed to fetch orders. Please try again."); // Show toast on error
-      setOrders([]);
+      console.error("Error fetching orders:", error)
+      toast.error("Failed to fetch orders. Please try again.")
+      setOrders([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getAuthToken = () => {
     try {
-      const sessionData = localStorage.getItem("session");
-      if (!sessionData) return null;
-      const session = JSON.parse(sessionData);
-      return session.token || null;
+      const sessionData = localStorage.getItem("session")
+      if (!sessionData) return null
+      const session = JSON.parse(sessionData)
+      return session.token || null
     } catch (error) {
-      console.error("Error getting auth token:", error);
-      return null;
+      console.error("Error getting auth token:", error)
+      return null
     }
-  };
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-PH", {
@@ -121,53 +113,50 @@ export default function OrdersPage() {
       currency: "PHP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(price);
-  };
+    }).format(price)
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
       case "confirmed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-800 border-blue-200"
       case "processing":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-purple-100 text-purple-800 border-purple-200"
       case "shipped":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-800 border-blue-200"
       case "delivered":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200"
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-100 text-red-800 border-red-200"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
-  };
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "pending":
       case "confirmed":
-        return <Calendar className="w-4 h-4" />;
+        return <Calendar className="w-4 h-4" />
       case "processing":
-        return <Package className="w-4 h-4" />;
+        return <Package className="w-4 h-4" />
       case "shipped":
       case "delivered":
-        return <Truck className="w-4 h-4" />;
+        return <Truck className="w-4 h-4" />
       default:
-        return <Package className="w-4 h-4" />;
+        return <Package className="w-4 h-4" />
     }
-  };
+  }
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.items.some((item) =>
-        item.product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+      order.items.some((item) => item.product.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   if (loading) {
     return (
@@ -178,14 +167,13 @@ export default function OrdersPage() {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -203,19 +191,13 @@ export default function OrdersPage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
         <div className="flex items-center mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/")}
-            className="text-blue-600 hover:text-blue-700"
-          >
+          <Button variant="ghost" onClick={() => router.push("/")} className="text-blue-600 hover:text-blue-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
         </div>
 
-        {/* Filters */}
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -247,7 +229,6 @@ export default function OrdersPage() {
           </CardContent>
         </Card>
 
-        {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -277,18 +258,12 @@ export default function OrdersPage() {
               >
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                    {/* Order Info */}
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Order #{order.order_number}
-                        </h3>
-                        <Badge
-                          className={`${getStatusColor(order.status)} flex items-center gap-1`}
-                        >
+                        <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
+                        <Badge className={`${getStatusColor(order.status)} flex items-center gap-1`}>
                           {getStatusIcon(order.status)}
-                          {order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </Badge>
                       </div>
 
@@ -297,19 +272,15 @@ export default function OrdersPage() {
                           <p className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             Ordered on{" "}
-                            {new Date(order.created_at).toLocaleDateString(
-                              "en-PH",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
+                            {new Date(order.created_at).toLocaleDateString("en-PH", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
                           </p>
                           <p className="flex items-center gap-2 mt-1">
                             <Package className="w-4 h-4" />
-                            {order.items.length} item
-                            {order.items.length > 1 ? "s" : ""}
+                            {order.items.length} item{order.items.length > 1 ? "s" : ""}
                           </p>
                         </div>
                         <div>
@@ -317,19 +288,13 @@ export default function OrdersPage() {
                             <MapPin className="w-4 h-4" />
                             Deliver to {order.first_name} {order.last_name}
                           </p>
-                          <p className="font-semibold text-blue-600 mt-1">
-                            Total: {formatPrice(order.total)}
-                          </p>
+                          <p className="font-semibold text-blue-600 mt-1">Total: {formatPrice(order.total)}</p>
                         </div>
                       </div>
 
-                      {/* Order Items Preview */}
                       <div className="flex items-center gap-3 mt-4">
                         {order.items.slice(0, 3).map((item) => (
-                          <div
-                            key={item.id}
-                            className="relative w-12 h-12 flex-shrink-0"
-                          >
+                          <div key={item.id} className="relative w-12 h-12 flex-shrink-0">
                             <Image
                               src={item.product.images[0] || "/placeholder.svg"}
                               alt={item.product.name}
@@ -347,7 +312,6 @@ export default function OrdersPage() {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button
                         variant="outline"
@@ -357,12 +321,9 @@ export default function OrdersPage() {
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </Button>
-                      {(order.status === "shipped" ||
-                        order.status === "delivered") && (
+                      {(order.status === "shipped" || order.status === "delivered") && (
                         <Button
-                          onClick={() =>
-                            router.push(`/orders/${order.id}/track`)
-                          }
+                          onClick={() => router.push(`/orders/${order.id}/track`)}
                           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                         >
                           <Truck className="w-4 h-4 mr-2" />
@@ -380,5 +341,5 @@ export default function OrdersPage() {
 
       <Footer />
     </div>
-  );
+  )
 }

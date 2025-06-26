@@ -1,65 +1,50 @@
-"use client";
-export const dynamic = "force-dynamic";
-import type React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  ArrowLeft,
-  Zap,
-  Shield,
-  CheckCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { login } from "@/lib/auth";
-import { useETrikeToast } from "@/components/ui/toast-container";
+"use client"
+export const dynamic = "force-dynamic"
+import type React from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import { Eye, EyeOff, Mail, Lock, Zap } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { login } from "@/lib/auth"
+import { useClientToast } from "@/hooks/use-client-toast"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const toast = useETrikeToast();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const toast = useClientToast()
 
-  // Handle the login form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const result = await login(email, password);
+      const result = await login(email, password)
       if (result) {
         const welcomeMessage =
           result.user.role === "admin"
             ? `Welcome back, Admin ${result.user.name}!`
-            : `Welcome back, ${result.user.name}!`;
+            : `Welcome back, ${result.user.name}!`
 
-        toast.authSuccess(welcomeMessage);
+        toast.authSuccess(welcomeMessage)
 
-        // Redirect user after successful login
         setTimeout(() => {
-          router.push(result.redirectTo);
-        }, 1000);
+          router.push(result.redirectTo)
+        }, 1000)
       }
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(
-        "Login Failed",
-        error.message || "Invalid email or password. Please try again."
-      );
+      console.error("Login error:", error)
+      toast.error("Login Failed", error.message || "Invalid email or password. Please try again.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center p-4">
@@ -80,22 +65,14 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Background card with rounded corners */}
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-gray-700/30 relative overflow-hidden">
-          {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-3xl"></div>
 
           <div className="relative z-10">
-            {/* Enhanced Header Section */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-6">
                 <div className="relative w-16 h-10">
-                  <Image
-                    src="/images/yamaaraw_logo.png"
-                    alt="YAMAARAW"
-                    fill
-                    className="object-contain"
-                  />
+                  <Image src="/images/yamaaraw_logo.png" alt="YAMAARAW" fill className="object-contain" />
                 </div>
               </div>
               <Badge className="mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-none shadow-lg">
@@ -109,12 +86,8 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Field */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
                 <div className="relative group">
@@ -131,12 +104,8 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Password Field */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
                 <div className="relative group">
@@ -155,16 +124,11 @@ export default function LoginPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
@@ -173,25 +137,18 @@ export default function LoginPage() {
                     type="checkbox"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                   />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-gray-900"
-                  >
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                     Remember me
                   </label>
                 </div>
 
                 <div className="text-sm">
-                  <Link
-                    href="/forgot-password"
-                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                  >
+                  <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
               </div>
 
-              {/* Enhanced Submit Button */}
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -212,16 +169,13 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Social Login Options */}
             <div className="mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white/90 text-gray-500 rounded-full">
-                    Or continue with
-                  </span>
+                  <span className="px-4 bg-white/90 text-gray-500 rounded-full">Or continue with</span>
                 </div>
               </div>
 
@@ -254,11 +208,7 @@ export default function LoginPage() {
                   variant="outline"
                   className="h-12 rounded-xl border-2 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="#1877F2"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                   Facebook
@@ -266,14 +216,10 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Sign Up Link */}
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <Link
-                  href="/register"
-                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                >
+                <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                   Sign up for free
                 </Link>
               </p>
@@ -281,26 +227,19 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-500">
           <p>
             By signing in, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="text-blue-600 hover:text-blue-700 transition-colors"
-            >
+            <Link href="/terms" className="text-blue-600 hover:text-blue-700 transition-colors">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link
-              href="/privacy"
-              className="text-blue-600 hover:text-blue-700 transition-colors"
-            >
+            <Link href="/privacy" className="text-blue-600 hover:text-blue-700 transition-colors">
               Privacy Policy
             </Link>
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 }

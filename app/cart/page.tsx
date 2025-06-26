@@ -1,25 +1,16 @@
-"use client";
-export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
-  ArrowLeft,
-  ShoppingBag,
-  Truck,
-  Shield,
-} from "lucide-react";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import ETrikeLoader from "@/components/ui/etrike-loader";
+"use client"
+export const dynamic = "force-dynamic"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import Link from "next/link"
+import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, ShoppingBag, Truck, Shield } from 'lucide-react'
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import ETrikeLoader from "@/components/ui/etrike-loader"
 import {
   getCart,
   getCartTotal,
@@ -27,101 +18,101 @@ import {
   updateCartQuantity,
   removeFromCart,
   type CartItem,
-} from "@/lib/cart";
-import { getCurrentUser  } from "@/lib/auth";
-import { useETrikeToast } from "@/components/ui/toast-container";
-import { useCart } from "@/contexts/cart-context";
-import CheckoutSuccessHandler from "@/components/checkout-success-handler";
+} from "@/lib/cart"
+import { getCurrentUser } from "@/lib/auth"
+import { useClientToast } from "@/hooks/use-client-toast"
+import { useCart } from "@/contexts/cart-context"
+import CheckoutSuccessHandler from "@/components/checkout-success-handler"
 
 export default function CartPage() {
-  const router = useRouter();
-  const toast = useETrikeToast();
-  const { refreshCart } = useCart();
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState<string | null>(null);
-  const [clearing, setClearing] = useState(false);
+  const router = useRouter()
+  const toast = useClientToast()
+  const { refreshCart } = useCart()
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState<string | null>(null)
+  const [clearing, setClearing] = useState(false)
 
   useEffect(() => {
-    const user = getCurrentUser ();
+    const user = getCurrentUser()
     if (!user) {
-      router.push("/login");
-      return;
+      router.push("/login")
+      return
     }
 
-    fetchCart();
-  }, [router]);
+    fetchCart()
+  }, [router])
 
   const fetchCart = async () => {
     try {
-      const cartItems = await getCart();
-      setCart(cartItems);
+      const cartItems = await getCart()
+      setCart(cartItems)
     } catch (error) {
-      console.error("Error fetching cart:", error);
-      toast.error("Failed to Load", "Could not load cart items");
+      console.error("Error fetching cart:", error)
+      toast.error("Failed to Load", "Could not load cart items")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleQuantityChange = async (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
+    if (newQuantity < 1) return
 
-    setUpdating(id);
+    setUpdating(id)
     try {
-      const success = await updateCartQuantity(id, newQuantity);
+      const success = await updateCartQuantity(id, newQuantity)
       if (success) {
-        await fetchCart();
-        await refreshCart();
-        toast.cartUpdated("Quantity updated successfully");
+        await fetchCart()
+        await refreshCart()
+        toast.cartUpdated("Quantity updated successfully")
       } else {
-        toast.error("Update Failed", "Could not update quantity");
+        toast.error("Update Failed", "Could not update quantity")
       }
     } catch (error) {
-      console.error("Error updating quantity:", error);
-      toast.error("Update Failed", "Could not update quantity");
+      console.error("Error updating quantity:", error)
+      toast.error("Update Failed", "Could not update quantity")
     } finally {
-      setUpdating(null);
+      setUpdating(null)
     }
-  };
+  }
 
   const handleRemoveItem = async (id: string) => {
-    setUpdating(id);
+    setUpdating(id)
     try {
-      const success = await removeFromCart(id);
+      const success = await removeFromCart(id)
       if (success) {
-        await fetchCart();
-        await refreshCart();
-        toast.success("Item Removed", "Item has been removed from your cart");
+        await fetchCart()
+        await refreshCart()
+        toast.success("Item Removed", "Item has been removed from your cart")
       } else {
-        toast.error("Remove Failed", "Could not remove item");
+        toast.error("Remove Failed", "Could not remove item")
       }
     } catch (error) {
-      console.error("Error removing item:", error);
-      toast.error("Remove Failed", "Could not remove item");
+      console.error("Error removing item:", error)
+      toast.error("Remove Failed", "Could not remove item")
     } finally {
-      setUpdating(null);
+      setUpdating(null)
     }
-  };
+  }
 
   const handleClearCart = async () => {
-    setClearing(true);
+    setClearing(true)
     try {
-      const success = await clearCart();
+      const success = await clearCart()
       if (success) {
-        setCart([]);
-        await refreshCart();
-        toast.success("Cart Cleared", "All items have been removed from your cart");
+        setCart([])
+        await refreshCart()
+        toast.success("Cart Cleared", "All items have been removed from your cart")
       } else {
-        toast.error("Clear Failed", "Could not clear cart");
+        toast.error("Clear Failed", "Could not clear cart")
       }
     } catch (error) {
-      console.error("Error clearing cart:", error);
-      toast.error("Clear Failed", "Could not clear cart");
+      console.error("Error clearing cart:", error)
+      toast.error("Clear Failed", "Could not clear cart")
     } finally {
-      setClearing(false);
+      setClearing(false)
     }
-  };
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-PH", {
@@ -129,12 +120,12 @@ export default function CartPage() {
       currency: "PHP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(price);
-  };
+    }).format(price)
+  }
 
-  const subtotal = getCartTotal(cart);
-  const shipping = subtotal > 50000 ? 0 : 500;
-  const total = subtotal + shipping;
+  const subtotal = getCartTotal(cart)
+  const shipping = subtotal > 50000 ? 0 : 500
+  const total = subtotal + shipping
 
   if (loading) {
     return (
@@ -146,7 +137,7 @@ export default function CartPage() {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 
   if (cart.length === 0) {
@@ -159,12 +150,8 @@ export default function CartPage() {
             <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-16 h-16 text-blue-500" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Your cart is empty
-            </h1>
-            <p className="text-gray-600 mb-8">
-              Looks like you haven't added any items to your cart yet.
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
+            <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
             <Button
               onClick={() => router.push("/products")}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
@@ -176,7 +163,7 @@ export default function CartPage() {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 
   return (
@@ -189,12 +176,8 @@ export default function CartPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-2">
-                Shopping Cart
-              </h1>
-              <p className="text-slate-300">
-                Review your items and proceed to checkout
-              </p>
+              <h1 className="text-3xl lg:text-4xl font-bold mb-2">Shopping Cart</h1>
+              <p className="text-slate-300">Review your items and proceed to checkout</p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
@@ -259,16 +242,12 @@ export default function CartPage() {
                           {item.product.name}
                         </h3>
                       </Link>
-                      <p className="text-sm text-gray-600 mb-1">
-                        {item.product.model}
-                      </p>
+                      <p className="text-sm text-gray-600 mb-1">{item.product.model}</p>
                       <Badge className="bg-blue-100 text-blue-600 border-blue-200 text-xs">
                         {item.product.category}
                       </Badge>
                       {item.color && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Color: {item.color}
-                        </p>
+                        <p className="text-sm text-gray-500 mt-1">Color: {item.color}</p>
                       )}
                     </div>
 
@@ -277,9 +256,7 @@ export default function CartPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          handleQuantityChange(item.id, item.quantity - 1)
-                        }
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1 || updating === item.id}
                         className="w-8 h-8 p-0"
                       >
@@ -291,9 +268,7 @@ export default function CartPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          handleQuantityChange(item.id, item.quantity + 1)
-                        }
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                         disabled={updating === item.id}
                         className="w-8 h-8 p-0"
                       >
@@ -303,12 +278,8 @@ export default function CartPage() {
 
                     {/* Price */}
                     <div className="text-right">
-                      <div className="font-bold text-lg text-blue-600">
-                        {formatPrice(item.total)}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {formatPrice(item.price)} each
-                      </div>
+                      <div className="font-bold text-lg text-blue-600">{formatPrice(item.total)}</div>
+                      <div className="text-sm text-gray-500">{formatPrice(item.price)} each</div>
                     </div>
 
                     {/* Remove Button */}
@@ -341,20 +312,14 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping Fee</span>
-                    <span
-                      className={
-                        shipping === 0 ? "text-green-600 font-medium" : ""
-                      }
-                    >
+                    <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
                       {shipping === 0 ? "Free" : formatPrice(shipping)}
                     </span>
                   </div>
                   <div className="border-t pt-3">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-blue-600">
-                        {formatPrice(total)}
-                      </span>
+                      <span className="text-blue-600">{formatPrice(total)}</span>
                     </div>
                   </div>
                 </div>
@@ -387,12 +352,7 @@ export default function CartPage() {
               <CardContent>
                 <div className="text-center text-gray-500 text-sm">
                   <p>Check out our featured products</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push("/products")}
-                    className="mt-2"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => router.push("/products")} className="mt-2">
                     Browse Products
                   </Button>
                 </div>
@@ -404,5 +364,5 @@ export default function CartPage() {
 
       <Footer />
     </div>
-  );
+  )
 }
